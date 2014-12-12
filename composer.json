@@ -1,0 +1,15 @@
+{
+    "name": "mjaschen/codebase_backup",
+    "description": "Codebase Repository Backup Script",
+    "minimum-stability": "stable",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Marcus Jaschen",
+            "email": "mjaschen@gmail.com"
+        }
+    ],
+    "require": {
+        "rmccue/requests": "~1.6.0"
+    }
+}

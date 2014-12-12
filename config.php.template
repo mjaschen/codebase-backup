@@ -1,0 +1,9 @@
+<?php
+
+return [
+    'CODEBASE_USER'     => '',
+    'CODEBASE_TOKEN'    => '',
+    'CODEBASE_BASE_URL' => 'https://api3.codebasehq.com',
+    'BACKUP_DIR'        => '',
+    'GIT_BIN'           => '/usr/local/bin/git',
+];
