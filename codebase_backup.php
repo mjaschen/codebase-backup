@@ -69,13 +69,12 @@ foreach ($projectsXml as $project) {
 
         $repositoryBackupDirectory = $backupDirectory . DIRECTORY_SEPARATOR . $repositorySlug . ".git";
 
-
         if (is_dir($repositoryBackupDirectory)) {
             echo "- updating repository " . (string) $repository->name . PHP_EOL;
             passthru("cd " . escapeshellarg($repositoryBackupDirectory) . " ; " . $config['GIT_BIN'] . " fetch");
         } else {
             echo "- cloning repository " . (string) $repository->name . PHP_EOL;
-            passthru("cd " . escapeshellarg($backupDirectory) . " ; " . $config['GIT_BIN'] . " clone --mirror '{$cloneUrl}'");
+            passthru("cd " . escapeshellarg($backupDirectory) . " ; " . $config['GIT_BIN'] . " clone --mirror " . escapeshellarg($cloneUrl));
         }
 
     }
