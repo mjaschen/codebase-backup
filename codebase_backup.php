@@ -20,18 +20,17 @@ $requestOptions = [
     'timeout' => 60,
 ];
 
-$projectsResponse = \Requests::get($config['CODEBASE_BASE_URL'] . "/projects", [], $requestOptions);
+$projectsResponse = \Requests::get($config['CODEBASE_BASE_URL'] . '/projects', [], $requestOptions);
 
 if (! $projectsResponse->success) {
-    echo "ERROR: Cannot fetch projects list!" . PHP_EOL;
+    echo 'ERROR: Cannot fetch projects list!' . PHP_EOL;
     print_r($projectsResponse);
-    die;
+    exit(30);
 }
 
 $projectsXml = new SimpleXMLElement($projectsResponse->body);
 
 foreach ($projectsXml as $project) {
-
     $projectSlug = (string) $project->permalink;
 
     echo 'Backup project "' . (string) $project->name . '"' . PHP_EOL;
@@ -41,42 +40,42 @@ foreach ($projectsXml as $project) {
     echo '- creating/checking backup directory: ' . $backupDirectory . ' ...' . PHP_EOL;
 
     if (! is_dir($backupDirectory)) {
-        mkdir($backupDirectory, 0770, true);
-    }
-
-    if (! is_dir($backupDirectory)) {
-        echo "ERROR: cannot create backup directory: " . $backupDirectory . PHP_EOL;
-        die;
+        if (! @mkdir($backupDirectory, 0770, true) && ! is_dir($backupDirectory)) {
+            echo 'ERROR: cannot create backup directory: ' . $backupDirectory . PHP_EOL;
+            exit(20);
+        }
     }
 
     // load list of repositories
 
-    $repositoriesResponse = \Requests::get($config['CODEBASE_BASE_URL'] . "/" . $projectSlug . "/repositories", [], $requestOptions);
+    $getReposUri = sprintf('%s/%s/repositories', $config['CODEBASE_BASE_URL'], $projectSlug);
+    $repositoriesResponse = \Requests::get(
+        $getReposUri,
+        [],
+        $requestOptions
+    );
 
     if (! $repositoriesResponse->success) {
-        echo "ERROR: Cannot fetch repositories list!" . PHP_EOL;
+        echo 'ERROR: Cannot fetch repositories list! URI: ' . $getReposUri . PHP_EOL;
         print_r($repositoriesResponse);
-        die;
+        continue;
     }
 
     $repositoriesXml = new SimpleXMLElement($repositoriesResponse->body);
 
     foreach ($repositoriesXml as $repository) {
-
-        $property = "clone-url";
-        $cloneUrl = (string) $repository->{$property};
+        $property       = 'clone-url';
+        $cloneUrl       = (string) $repository->{$property};
         $repositorySlug = (string) $repository->permalink;
 
-        $repositoryBackupDirectory = $backupDirectory . DIRECTORY_SEPARATOR . $repositorySlug . ".git";
+        $repositoryBackupDirectory = $backupDirectory . DIRECTORY_SEPARATOR . $repositorySlug . '.git';
 
         if (is_dir($repositoryBackupDirectory)) {
-            echo "- updating repository " . (string) $repository->name . PHP_EOL;
-            passthru("cd " . escapeshellarg($repositoryBackupDirectory) . " ; " . $config['GIT_BIN'] . " fetch");
+            echo '- updating repository ' . (string) $repository->name . PHP_EOL;
+            passthru('cd ' . escapeshellarg($repositoryBackupDirectory) . ' ; ' . $config['GIT_BIN'] . ' fetch');
         } else {
-            echo "- cloning repository " . (string) $repository->name . PHP_EOL;
-            passthru("cd " . escapeshellarg($backupDirectory) . " ; " . $config['GIT_BIN'] . " clone --mirror " . escapeshellarg($cloneUrl));
+            echo '- cloning repository ' . (string) $repository->name . PHP_EOL;
+            passthru('cd ' . escapeshellarg($backupDirectory) . ' ; ' . $config['GIT_BIN'] . ' clone --mirror ' . escapeshellarg($cloneUrl));
         }
-
     }
-
 }
