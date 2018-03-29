@@ -5,15 +5,16 @@ require_once __DIR__ . '/vendor/autoload.php';
 
 $configFile = __DIR__ . '/config.php';
 if (! file_exists($configFile)) {
-    die('config.php not found.');
+    die('config.php not found. Please copy config.php.template to config.php and adjust the settings.');
 }
 
 $config = include $configFile;
+$git    = empty($config['GIT_BIN']) ? 'git' : $config['GIT_BIN'];
 
 // 1. Load list of projects
-// 2. create folder for each project
+// 2. create directory for each project
 // 3. Load list of repositories for each project
-// 4. clone each repository into project folder (or fetch if repository was already cloned)
+// 4. clone each repository into project directory (or fetch if repository was already cloned)
 
 $requestOptions = [
     'auth'    => new \Requests_Auth_Basic([$config['CODEBASE_USER'], $config['CODEBASE_TOKEN']]),
@@ -24,7 +25,8 @@ $projectsResponse = \Requests::get($config['CODEBASE_BASE_URL'] . '/projects', [
 
 if (! $projectsResponse->success) {
     echo 'ERROR: Cannot fetch projects list!' . PHP_EOL;
-    print_r($projectsResponse);
+    echo 'Response status code: ' . $projectsResponse->status_code . PHP_EOL;
+    echo $projectsResponse->body . PHP_EOL;
     exit(30);
 }
 
@@ -71,11 +73,13 @@ foreach ($projectsXml as $project) {
         $repositoryBackupDirectory = $backupDirectory . DIRECTORY_SEPARATOR . $repositorySlug . '.git';
 
         if (is_dir($repositoryBackupDirectory)) {
-            echo '- updating repository ' . (string) $repository->name . PHP_EOL;
-            passthru('cd ' . escapeshellarg($repositoryBackupDirectory) . ' ; ' . $config['GIT_BIN'] . ' fetch');
+            echo '- updating repository ' . (string)$repository->name . PHP_EOL;
+            passthru('cd ' . escapeshellarg($repositoryBackupDirectory) . ' ; ' . $git . ' fetch');
         } else {
-            echo '- cloning repository ' . (string) $repository->name . PHP_EOL;
-            passthru('cd ' . escapeshellarg($backupDirectory) . ' ; ' . $config['GIT_BIN'] . ' clone --mirror ' . escapeshellarg($cloneUrl));
+            echo '- cloning repository ' . (string)$repository->name . PHP_EOL;
+            passthru(
+                'cd ' . escapeshellarg($backupDirectory) . ' ; ' . $git . ' clone --mirror ' . escapeshellarg($cloneUrl)
+            );
         }
     }
 }
