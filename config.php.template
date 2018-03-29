@@ -5,5 +5,6 @@ return [
     'CODEBASE_TOKEN'    => '',
     'CODEBASE_BASE_URL' => 'https://api3.codebasehq.com',
     'BACKUP_DIR'        => '',
-    'GIT_BIN'           => '/usr/local/bin/git',
+    // optional if you want to use a specific git version
+    'GIT_BIN'           => '',
 ];
