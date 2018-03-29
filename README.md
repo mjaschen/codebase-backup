@@ -6,6 +6,11 @@ It's used for hosting software projects, like Github or Gitlab.
 Codebase provides an API which is leveraged by this tool for exploring all
 of an account's repositories and backup them to a local folder.
 
+## Requirements
+
+- Codebase account
+- PHP ≥5.6
+
 ## Installation and Setup
 
 * clone the backup script repository: `git clone git@github.com:mjaschen/codebase-backup.git`
